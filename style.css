@@ -937,11 +937,6 @@ body{
   -webkit-tap-highlight-color: transparent;
 }
 
-/* =========================================================
-   ✅ HIER stellst du KLICK / PASSIV INDIVIDUELL ein
-   (nur diese Werte ändern)
-   ========================================================= */
-
 /* KLICK Button */
 #buyClick{
   --val-top: 44px;         /* Abstand von oben für große Zahl */
@@ -956,4 +951,12 @@ body{
   --cost-bottom: 8px;
   --val-size: 50px;
   --cost-size: 24px;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+input, select, textarea {
+  -webkit-appearance: none;
 }
