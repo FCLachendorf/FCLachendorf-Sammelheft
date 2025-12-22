@@ -157,7 +157,7 @@ button, input, select, textarea{
   right:66px;
   top:48%;
   transform:translateY(-50%);
-  font-family:"Thunder-ExtraBoldItalic";
+  font-family:"Thunder-ExtraBoldItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size:18px;
   color:#fff;
   letter-spacing:.3px;
@@ -398,7 +398,7 @@ button, input, select, textarea{
 
 /* Beschreibungen wie Shop */
 #viewMain .mainUpgrades .tmUpDesc{
-  font-family:"Thunder-MediumItalic";
+  font-family:"Thunder-MediumItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size:15px;
   color:#312323;
   text-align:center;
@@ -435,8 +435,8 @@ button, input, select, textarea{
   line-height:1.05;
   padding-left:6px;
 }
-.tmLine1{font-family:"Thunder-ExtraBoldItalic"; font-size:16px;}
-.tmLine2{font-family:"Thunder-MediumItalic"; font-size:13px;}
+.tmLine1{font-family:"Thunder-ExtraBoldItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-size:16px;}
+.tmLine2{font-family:"Thunder-MediumItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-size:13px;}
 
 .tmPriceBtn{
   position:relative;
@@ -452,7 +452,7 @@ button, input, select, textarea{
   left:45%;
   top:50%;
   transform:translate(-50%, -50%);
-  font-family:"Thunder-SemiBoldItalic";
+  font-family:"Thunder-SemiBoldItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size:18px;
   color:#000;
   letter-spacing:.4px;
@@ -488,7 +488,7 @@ button, input, select, textarea{
   left:50%;
   top: var(--upgrade-value-top);
   transform:translateX(-50%);
-  font-family:"Thunder-ExtraBoldItalic";
+  font-family:"Thunder-ExtraBoldItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size:50px;
   color:#000;
   width:100%;
@@ -504,7 +504,7 @@ button, input, select, textarea{
   left:50%;
   bottom: var(--upgrade-cost-bottom);
   transform:translateX(-50%);
-  font-family:"Thunder-SemiBoldItalic";
+  font-family:"Thunder-SemiBoldItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size:24px;
   color:#000;
   width:100%;
@@ -516,7 +516,7 @@ button, input, select, textarea{
   font-kerning: none;
 }
 .tmUpDesc{
-  font-family:"Thunder-MediumItalic";
+  font-family:"Thunder-MediumItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size:17px;
   color:#845152;
   text-align:center;
@@ -883,7 +883,7 @@ button, input, select, textarea{
 .albumProgress{
   margin: 0;
   padding-top: 0;
-  font-family:"Thunder-MediumItalic";
+  font-family:"Thunder-MediumItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   color:#845152;
   font-size:13px;
   line-height:1.1;
@@ -949,14 +949,14 @@ button, input, select, textarea{
 .pageNum{
   border:none;
   background:transparent;
-  font-family:"Thunder-MediumItalic";
+  font-family:"Thunder-MediumItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   color:#845152;
   font-size:28px;
   padding:0 6px;
   touch-action: manipulation;
 }
 .pageNum.isActive{
-  font-family:"Thunder-ExtraBoldItalic";
+  font-family:"Thunder-ExtraBoldItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   color:#fff;
 }
 
