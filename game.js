@@ -1339,3 +1339,25 @@ renderAll();
     }
   }, { capture: true });
 })();
+
+// iOS/Safari: Pinch-Zoom und Double-Tap-Zoom im Spielbereich verhindern
+(function preventZoom() {
+  const area = document.getElementById("stage") || document.body;
+
+  // Pinch-Zoom (Safari) blocken
+  area.addEventListener("touchstart", (e) => {
+    if (e.touches && e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+
+  area.addEventListener("touchmove", (e) => {
+    if (e.touches && e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+
+  // Double-Tap-Zoom blocken
+  let lastTouchEnd = 0;
+  area.addEventListener("touchend", (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) e.preventDefault();
+    lastTouchEnd = now;
+  }, { passive: false });
+})();
