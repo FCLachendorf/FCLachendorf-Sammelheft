@@ -1,0 +1,959 @@
+@font-face{
+  font-family:"Thunder-ExtraBoldItalic";
+  src:url("assets/fonts/Thunder-ExtraBoldLCItalic.ttf") format("truetype");
+  font-style:italic;
+  font-weight:800;
+}
+@font-face{
+  font-family:"Thunder-MediumItalic";
+  src:url("assets/fonts/Thunder-MediumLCItalic.ttf") format("truetype");
+  font-style:italic;
+  font-weight:500;
+}
+@font-face{
+  font-family:"Thunder-SemiBoldItalic";
+  src:url("assets/fonts/Thunder-SemiBoldLCItalic.ttf") format("truetype");
+  font-style:italic;
+  font-weight:600;
+}
+@font-face{
+  font-family:"Thunder-ExtraBold";
+  src:url("assets/fonts/Thunder-ExtraBoldLC.ttf") format("truetype");
+  font-style:normal;
+  font-weight:800;
+}
+@font-face{
+  font-family:"Thunder-Medium";
+  src:url("assets/fonts/Thunder-MediumLC.ttf") format("truetype");
+  font-style:normal;
+  font-weight:500;
+}
+@font-face{
+  font-family:"Thunder-SemiBold";
+  src:url("assets/fonts/Thunder-SemiBoldLC.ttf") format("truetype");
+  font-style:normal;
+  font-weight:600;
+}
+
+:root{
+  --text:#f2f4f8;
+  --muted:rgba(242,244,248,.75);
+  --panel:rgba(0,0,0,.35);
+  --line:rgba(255,255,255,.10);
+  --red:#d63c3c;
+
+  /* Shop-Defaults (Rabatt/Scout) */
+  --upgrade-value-top: 54px;
+  --upgrade-cost-bottom: 12px;
+
+  --shop-grid-top: 0px;
+  --shop-upgrades-top: 130px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background:#0b0d10;
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.shell{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+}
+
+.stage{
+  width:min(430px, 100vw);
+  aspect-ratio:9/16;
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  background:#101216;
+  user-select:none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bg{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  filter: saturate(1.05);
+}
+
+/* ---------- HUD ---------- */
+.topbar{
+  position:relative;
+  z-index:3;
+  height:140px;
+  padding:12px;
+}
+
+.coinsBar{
+  position:absolute;
+  left:12px;
+  top:12px;
+  width:160px;
+  height:42px;
+}
+.coinsBar img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+.coinsBar span{
+  position:absolute;
+  right:66px;
+  top:48%;
+  transform:translateY(-50%);
+  font-family:"Thunder-ExtraBoldItalic";
+  font-size:18px;
+  color:#fff;
+  letter-spacing:.3px;
+  font-variant-numeric: tabular-nums;
+  font-kerning: none;
+}
+
+.hudBtn{
+  position:absolute;
+  top:62px;
+  width:64px;
+  height:64px;
+  border:none;
+  padding:0;
+  background:transparent;
+  display:grid;
+  place-items:center;
+  touch-action: manipulation;
+}
+.hudBtn img{width:50px; height:50px; object-fit:contain; display:block;}
+.hudLeft{left:12px;}
+.hudRight{right:12px;}
+
+/* ---------- Views ---------- */
+.view{
+  position:relative;
+  z-index:2;
+  height:calc(100% - 140px);
+  padding:10px 12px 14px;
+  display:none;
+  overflow:auto;
+}
+.view.active{display:block}
+#viewShop{overflow:hidden}
+
+/* ---------- Main (alt Basis) ---------- */
+.centerArea{
+  height:42%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+.logoBtn{
+  width:240px;
+  height:240px;
+  border:none;
+  background:transparent;
+  position:relative;
+  display:grid;
+  place-items:center;
+  touch-action: manipulation;
+}
+.logoBig{width:210px; height:210px; object-fit:contain}
+.clickRing{
+  position:absolute;
+  width:250px;
+  height:250px;
+  opacity:0;
+  transform: scale(.92);
+  pointer-events:none;
+}
+
+.logoBig{
+  transition: transform 120ms ease;
+  transform: scale(1);
+  transform-origin: center;
+  will-change: transform;
+}
+@media (hover:hover) and (pointer:fine){
+  .logoBtn:hover .logoBig{transform: scale(1.04);}
+}
+.logoBtn.isDown .logoBig{transform: scale(0.96);}
+.logoBig.bounce{animation: logoBounce 240ms cubic-bezier(.2,.9,.2,1);}
+@keyframes logoBounce{
+  0%{transform: scale(1.00);}
+  35%{transform: scale(1.035);}
+  65%{transform: scale(0.985);}
+  85%{transform: scale(1.012);}
+  100%{transform: scale(1.00);}
+}
+
+.hint{
+  font-size:13px;
+  color:var(--muted);
+  text-align:center;
+  padding:0 14px;
+}
+
+/* alte Cards bleiben im CSS (werden im Main nicht mehr genutzt) */
+.upgrades{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.upgradeCard{
+  background: rgba(0,0,0,.28);
+  border:1px solid var(--line);
+  padding:10px;
+}
+.uTitle{font-weight:1000; letter-spacing:.8px; font-size:13px}
+.uDesc{color:var(--muted); font-size:12px; margin-top:2px}
+.uRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:10px;
+  gap:10px;
+}
+.uVal{font-weight:1000}
+.uBtn{
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(214,60,60,.88);
+  color:white;
+  font-weight:1000;
+  touch-action: manipulation;
+}
+.uBtn:disabled{
+  opacity:.45;
+  background: rgba(255,255,255,.08);
+}
+.uCost{color:var(--muted); font-size:12px; margin-top:8px}
+
+.footerNote{
+  margin-top:10px;
+  color:rgba(255,255,255,.8);
+  font-size:12px;
+  text-align:center;
+}
+
+/* =========================================================
+   MAIN SCREEN – OPTIMIERT (wie Photoshop)
+   ========================================================= */
+#viewMain{
+  overflow:hidden; /* kein Scrollen im Main */
+}
+
+#viewMain .mainWrap{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+#viewMain .centerArea{
+  flex:1;
+  height:auto;
+  width:100%;
+  justify-content:flex-start;
+  padding-top:6px;
+  gap:0;
+}
+
+/* Logo deutlich größer */
+#viewMain .logoBtn{
+  width:min(360px, 88vw);
+  height:min(360px, 88vw);
+}
+#viewMain .logoBig{
+  width:min(340px, 82vw);
+  height:min(340px, 82vw);
+}
+#viewMain .clickRing{
+  width:min(390px, 96vw);
+  height:min(390px, 96vw);
+}
+
+/* Zwei große Buttons unten */
+#viewMain .mainUpgrades{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  padding:0 24px;
+  justify-items:center;
+  margin-top:-6px;
+}
+
+#viewMain .mainUpgradeCard{
+  width:100%;
+  max-width:190px;
+}
+
+#viewMain .mainUpgradeBtn{
+  width:100%;
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  touch-action: manipulation;
+  transform: translateY(0) scale(1);
+  will-change: transform;
+}
+#viewMain .mainUpgradeBtn.isDown{
+  transform: translateY(1px) scale(0.99);
+}
+#viewMain .mainUpgradeBtn:disabled{
+  opacity:.45;
+  pointer-events:none;
+}
+
+#viewMain .mainUpgradeBtn img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+
+/* ✅ HIER ist der entscheidende Fix:
+   - Wir nutzen Variablen, die du pro Button setzen kannst
+   - und überschreiben Inline-Styles aus dem JS mit !important,
+     damit deine CSS-Änderungen endlich sichtbar werden. */
+#viewMain .mainUpgrades .tmUpValue{
+  top: var(--val-top, var(--main-val-top, var(--upgrade-value-top))) !important;
+  font-size: var(--val-size, var(--main-val-size, 50px)) !important;
+
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-kerning: none;
+  letter-spacing: .35px;
+}
+#viewMain .mainUpgrades .tmUpCost{
+  bottom: var(--cost-bottom, var(--main-cost-bottom, var(--upgrade-cost-bottom))) !important;
+  font-size: var(--cost-size, var(--main-cost-size, 24px)) !important;
+
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-kerning: none;
+  letter-spacing: .35px;
+}
+
+/* Beschreibungen wie Shop (Font + Farbe), etwas kleiner */
+#viewMain .mainUpgrades .tmUpDesc{
+  font-family:"Thunder-MediumItalic";
+  font-size:15px;
+  color:#312323;
+  text-align:center;
+}
+
+/* Hint ganz unten zentriert im selben Stil */
+#viewMain .mainHint{
+  margin-top:6px;
+  padding:0 10px 10px;
+  font-size:20px;
+  width:100%;
+  text-align:center;
+}
+
+/* Debug-Footer im Main ausblenden (Shop/Album bleibt unberührt) */
+#viewMain .footerNote{
+  display:none;
+}
+
+/* ---------- Shop Grid ---------- */
+.tmChestGrid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:16px;
+  margin-top: var(--shop-grid-top);
+}
+
+.tmChestCard{display:flex; flex-direction:column; gap:6px;}
+.tmChestImgBtn{border:none; padding:0; background:transparent; touch-action: manipulation;}
+.tmChestImgBtn img{width:100%; height:auto; display:block;}
+
+.tmChestInfo{
+  color:#dd6666;
+  line-height:1.05;
+  padding-left:6px;
+}
+.tmLine1{font-family:"Thunder-ExtraBoldItalic"; font-size:16px;}
+.tmLine2{font-family:"Thunder-MediumItalic"; font-size:13px;}
+
+.tmPriceBtn{
+  position:relative;
+  border:none;
+  padding:0;
+  background:transparent;
+  cursor:pointer;
+  touch-action: manipulation;
+}
+.tmPriceBtn img{width:100%; height:auto; display:block;}
+.tmPriceText{
+  position:absolute;
+  left:45%;
+  top:50%;
+  transform:translate(-50%, -50%);
+  font-family:"Thunder-SemiBoldItalic";
+  font-size:18px;
+  color:#000;
+  letter-spacing:.4px;
+  width:100%;
+  text-align:center;
+  pointer-events:none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-kerning: none;
+}
+.tmPriceBtn.isDisabled{opacity:.45; pointer-events:none;}
+
+/* ---------- Shop Upgrades ---------- */
+.tmUpgrades{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top: var(--shop-upgrades-top);
+}
+.tmUpgradeCard{display:flex; flex-direction:column; gap:6px;}
+.tmUpgradeBtn{
+  position:relative;
+  border:none;
+  padding:0;
+  background:transparent;
+  cursor:pointer;
+  touch-action: manipulation;
+}
+.tmUpgradeBtn img{width:100%; height:auto; display:block;}
+
+.tmUpValue{
+  position:absolute;
+  left:50%;
+  top: var(--upgrade-value-top);
+  transform:translateX(-50%);
+  font-family:"Thunder-ExtraBoldItalic";
+  font-size:50px;
+  color:#000;
+  width:100%;
+  text-align:center;
+  pointer-events:none;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-kerning: none;
+}
+.tmUpCost{
+  position:absolute;
+  left:50%;
+  bottom: var(--upgrade-cost-bottom);
+  transform:translateX(-50%);
+  font-family:"Thunder-SemiBoldItalic";
+  font-size:24px;
+  color:#000;
+  width:100%;
+  text-align:center;
+  pointer-events:none;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-kerning: none;
+}
+.tmUpDesc{
+  font-family:"Thunder-MediumItalic";
+  font-size:17px;
+  color:#845152;
+  text-align:center;
+  padding:0;
+}
+
+/* ---------- Album (Basis) ---------- */
+.albumProgress{
+  color:rgba(255,255,255,.85);
+  font-weight:900;
+  font-size:13px;
+  margin-bottom:10px;
+}
+.albumGrid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+.slot{
+  position:relative;
+  border:1px solid var(--line);
+  overflow:hidden;
+  background: rgba(0,0,0,.22);
+  aspect-ratio: 72 / 100;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  touch-action: manipulation;
+}
+.slot img{width:100%; height:100%; object-fit:cover; display:block;}
+
+.dots{
+  position:absolute;
+  left:10px;
+  right:10px;
+  bottom:8px;
+  display:flex;
+  justify-content:center;
+  gap:6px;
+}
+.dot{width:14px; height:14px; object-fit:contain;}
+
+/* ---------- FX Layer ---------- */
+.fxLayer{
+  position:absolute;
+  inset:0;
+  z-index:6;
+  pointer-events:none;
+  overflow:hidden;
+}
+.fxParticle{
+  position:absolute;
+  left:0;
+  top:0;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+}
+.fxText{
+  position:absolute;
+  left:0;
+  top:0;
+  transform: translate(-50%, -50%);
+  font-weight:1000;
+  font-size:14px;
+  color: rgba(255,255,255,.92);
+  text-shadow: 0 6px 14px rgba(0,0,0,.55);
+  will-change: transform, opacity;
+  user-select:none;
+}
+.fxRing{
+  position:absolute;
+  left:0;
+  top:0;
+  width:250px;
+  height:250px;
+  transform: translate(-50%, -50%) scale(.92);
+  opacity:0;
+  pointer-events:none;
+  will-change: transform, opacity;
+}
+
+/* ---------- Modals ---------- */
+.modal{
+  position:absolute;
+  inset:0;
+  z-index:10;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(8px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+}
+.hidden{display:none}
+
+.modalBox{
+  width:100%;
+  background: rgba(0,0,0,.55);
+  border:1px solid rgba(255,255,255,.12);
+  padding:12px;
+  position:relative;
+}
+.modalBox.big{padding:14px}
+
+/* Close-Icon ohne extra Border */
+.modalClose{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:50px;
+  height:50px;
+  border:none;
+  background: rgba(0,0,0,.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  touch-action: manipulation;
+}
+.modalClose img{width:22px; height:22px}
+
+.cardViewer{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  padding-top:16px;
+}
+.badgeRow{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  min-height:34px;
+}
+.badge{height:30px; width:auto;}
+
+.flipWrap{
+  width:min(300px, 78%);
+  aspect-ratio: 72 / 100;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.25);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.cardBig{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform: rotateY(0deg);
+}
+.cardBig.flipAnim{animation: flip .38s ease-in-out;}
+@keyframes flip{
+  0%{transform: rotateY(0deg)}
+  50%{transform: rotateY(90deg)}
+  100%{transform: rotateY(0deg)}
+}
+
+.dotsRow{display:flex; gap:8px; justify-content:center; align-items:center;}
+
+.secondaryBtn{
+  width:100%;
+  margin-top:12px;
+  padding:12px 14px;
+  border:1px solid rgba(255,255,255,.14);
+  font-weight:1000;
+  background: rgba(255,255,255,.06);
+  color:rgba(255,255,255,.92);
+  touch-action: manipulation;
+}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:absolute;
+  left:50%;
+  bottom:14px;
+  transform:translateX(-50%);
+  background: rgba(0,0,0,.68);
+  border:1px solid rgba(255,255,255,.12);
+  padding:10px 12px;
+  font-weight:1000;
+  font-size:12px;
+  z-index:20;
+}
+
+/* =========================================================
+   OPEN SCREEN
+   ========================================================= */
+#viewOpen{
+  position:absolute;
+  inset:0;
+  z-index:8;
+  padding:0;
+  height:auto;
+  overflow:hidden;
+}
+.openWrap{position:absolute; inset:0;}
+
+.openCardArea{
+  position:absolute;
+  left:0;
+  right:0;
+  top:44px;
+  display:flex;
+  justify-content:center;
+  pointer-events:none;
+  z-index:6;
+}
+
+.openCardFrame{
+  position:relative;
+  width:min(242px, 56vw);
+  aspect-ratio: 72 / 100;
+  overflow:visible;
+  filter: drop-shadow(0 16px 35px rgba(0,0,0,.55));
+  z-index:7;
+}
+
+.openCardBig{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  opacity:0;
+  transition: opacity 120ms ease;
+}
+.openCardFrame.hasCard .openCardBig{opacity:1;}
+
+.openBadge{
+  position:absolute;
+  top:-12px;
+  width:96px;
+  height:auto;
+  pointer-events:none;
+  z-index:8;
+}
+.openBadgeLeft{left:-12px;}
+.openBadgeRight{right:-12px;}
+
+.openChestBtn{
+  position:absolute;
+  left:50%;
+  bottom:116px;
+  transform:translateX(-50%);
+  width:320px;
+  height:320px;
+  border:none;
+  padding:0;
+  background:transparent;
+  touch-action: manipulation;
+  z-index:4;
+}
+
+.openChestImg{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  transform: translateY(6px) scale(1);
+  transform-origin:center;
+  will-change: transform;
+}
+.openChestBtn.isDown .openChestImg{
+  transform: translateY(8px) scale(0.94);
+}
+
+.openThumbs{
+  position:absolute;
+  left:50%;
+  bottom:24px;
+  transform:translateX(-50%);
+  width:92%;
+  height:120px;
+  pointer-events:auto;
+  z-index:9;
+}
+
+.openThumb{
+  position:absolute;
+  left:50%;
+  bottom:0;
+  width:84px;
+  aspect-ratio: 72 / 100;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.10);
+  overflow:visible;
+  transform: translateX(-50%);
+  transition: transform 240ms cubic-bezier(.2,.9,.2,1), filter 160ms ease;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.45));
+  cursor:pointer;
+  touch-action: manipulation;
+}
+.openThumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.openThumb.dup{
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.45)) brightness(0.72) saturate(0.90);
+}
+
+.dupRefund{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%);
+  padding:6px 10px;
+  border:1px solid rgba(255,255,255,.16);
+  background: rgba(0,0,0,.55);
+  color: rgba(255,255,255,.95);
+  font-weight:1000;
+  font-size:14px;
+  text-shadow: 0 6px 14px rgba(0,0,0,.55);
+  pointer-events:none;
+}
+
+.openThumb .tBadge{
+  position:absolute;
+  top:-7px;
+  width:54px;
+  height:auto;
+  pointer-events:none;
+}
+.openThumb .tBadge.left{left:-7px;}
+.openThumb .tBadge.right{right:-7px;}
+
+.flyCard{
+  position:absolute;
+  left:0;
+  top:0;
+  width:190px;
+  aspect-ratio:72/100;
+  transform: translate(-50%, -50%) scale(0.78) rotate(0deg);
+  z-index:10;
+  pointer-events:none;
+  filter: drop-shadow(0 22px 35px rgba(0,0,0,.55));
+}
+
+/* =========================================================
+   CRITICAL FIX: Beim Öffnen NUR Open-View sichtbar
+   ========================================================= */
+.stage.isOpening .view{display:none !important;}
+.stage.isOpening #viewOpen{display:block !important;}
+.stage.isOpening .topbar{display:none;}
+
+/* =========================================================
+   Album Overrides v3 (Pager sichtbar + KEINE Dot-Aufblasung)
+   ========================================================= */
+#viewAlbum{
+  overflow:hidden;
+  padding: 0px 12px 8px;
+  margin-top: -8px;
+}
+
+#viewAlbum.view.active{
+  display:flex;
+  flex-direction:column;
+}
+
+.albumProgress{
+  margin: 0;
+  padding-top: 0;
+  font-family:"Thunder-MediumItalic";
+  color:#845152;
+  font-size:13px;
+  line-height:1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.albumProgress .complete{ color:#fff; }
+.albumProgress .sep{ opacity:.8; }
+
+.albumPageWrap{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:4px;
+}
+
+.albumGrid{
+  flex:1;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:8px;
+  padding: 0 8px;
+  align-content:start;
+}
+
+#viewAlbum .slot{
+  border:none !important;
+  background:transparent !important;
+  padding:0 !important;
+  min-width:0;
+  overflow:hidden;
+}
+
+#viewAlbum .slot > img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+#viewAlbum .dots{
+  left:0;
+  right:0;
+  bottom:3px;
+  gap:4px;
+}
+#viewAlbum .dots .dot{
+  width:6px;
+  height:6px;
+  object-fit:contain;
+  opacity:0.85;
+}
+
+.albumPager{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  padding: 0 0 2px;
+}
+
+.pageNum{
+  border:none;
+  background:transparent;
+  font-family:"Thunder-MediumItalic";
+  color:#845152;
+  font-size:28px;
+  padding:0 6px;
+  touch-action: manipulation;
+}
+.pageNum.isActive{
+  font-family:"Thunder-ExtraBoldItalic";
+  color:#fff;
+}
+
+/* ---------- KEINE abgerundeten Ecken ---------- */
+.stage, .stage *{
+  border-radius:0 !important;
+}
+
+/* Kein Markieren / kein Bild-Drag */
+.stage, .stage *{
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.stage img{
+  -webkit-user-drag: none;
+}
+
+.stage{
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   ✅ HIER stellst du KLICK / PASSIV INDIVIDUELL ein
+   (nur diese Werte ändern)
+   ========================================================= */
+
+/* KLICK Button */
+#buyClick{
+  --val-top: 44px;         /* Abstand von oben für große Zahl */
+  --cost-bottom: 8px;     /* Abstand von unten für Kosten */
+  --val-size: 50px;        /* Schriftgröße große Zahl */
+  --cost-size: 24px;       /* Schriftgröße Kosten */
+}
+
+/* PASSIV Button */
+#buyIdle{
+  --val-top: 44px;
+  --cost-bottom: 8px;
+  --val-size: 50px;
+  --cost-size: 24px;
+}

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>FCL Advent Lootgame</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="shell">
+    <main class="stage" id="stage">
+      <!-- Background -->
+      <div class="bg" id="bg"></div>
+      <div class="fxLayer" id="fxLayer" aria-hidden="true"></div>
+
+      <!-- TOP HUD -->
+      <header class="topbar" id="topbar">
+        <div class="coinsBar" id="coinsBar" aria-label="Coins">
+          <img src="assets/ui/coins_bar.png" alt="" />
+          <span id="coinsText">0</span>
+        </div>
+
+        <button class="hudBtn hudLeft" id="btnLeft" title="Album">
+          <img id="btnLeftIcon" src="assets/icons/icon_album.png" alt="Album" />
+        </button>
+
+        <button class="hudBtn hudRight" id="btnRight" title="Shop">
+          <img id="btnRightIcon" src="assets/icons/icon_shop.png" alt="Shop" />
+        </button>
+      </header>
+
+      <!-- MAIN -->
+      <section class="view active" id="viewMain">
+        <div class="mainWrap">
+          <div class="centerArea">
+            <button class="logoBtn" id="logoBtn" aria-label="FCL Logo klicken">
+              <img class="logoBig" src="assets/ui/fcl_logo_big.png" alt="FCL" />
+              <img class="clickRing" id="clickRing" src="assets/ui/logo_click_ring.png" alt="" />
+            </button>
+          </div>
+
+          <!-- NUR KLICK + PASSIV (Style wie Shop-Upgrades) -->
+          <div class="mainUpgrades" id="mainUpgrades">
+            <div class="tmUpgradeCard mainUpgradeCard">
+              <button class="tmUpgradeBtn mainUpgradeBtn" id="buyClick" type="button" aria-label="Klick Upgrade kaufen">
+                <img class="tmUpBg" id="buyClickBg" src="assets/ui/klick_button_n.png" alt="">
+                <div class="tmUpValue" id="uClickVal">+1</div>
+                <div class="tmUpCost" id="uClickCost">0</div>
+              </button>
+              <div class="tmUpDesc">Coins pro Klick</div>
+            </div>
+
+            <div class="tmUpgradeCard mainUpgradeCard">
+              <button class="tmUpgradeBtn mainUpgradeBtn" id="buyIdle" type="button" aria-label="Passiv Upgrade kaufen">
+                <img class="tmUpBg" id="buyIdleBg" src="assets/ui/passiv_button_n.png" alt="">
+                <div class="tmUpValue" id="uIdleVal">0/s</div>
+                <div class="tmUpCost" id="uIdleCost">0</div>
+              </button>
+              <div class="tmUpDesc">Coins pro Sekunde</div>
+            </div>
+          </div>
+
+          <!-- Hint unten zentriert im Shop-Style -->
+          <div class="tmUpDesc mainHint" id="hintText">Klicke das Logo, verdiene Coins, öffne Truhen.</div>
+        </div>
+
+        <!-- bleibt im Code (Debug), wird im Main per CSS ausgeblendet -->
+        <div class="footerNote" id="footerNote"></div>
+      </section>
+
+      <!-- SHOP -->
+      <section class="view" id="viewShop">
+        <div class="tmChestGrid" id="shopGrid"></div>
+        <div class="tmUpgrades" id="shopUpgrades"></div>
+      </section>
+
+      <!-- ALBUM -->
+      <section class="view" id="viewAlbum">
+        <div class="albumProgress" id="albumProgress"></div>
+
+        <div class="albumPageWrap" id="albumPageWrap">
+          <div class="albumGrid" id="albumGrid"></div>
+
+          <div class="albumPager" id="albumPager" aria-label="Album Seiten">
+            <button class="pageNum isActive" type="button" data-page="0">1</button>
+            <button class="pageNum" type="button" data-page="1">2</button>
+            <button class="pageNum" type="button" data-page="2">3</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPEN SCREEN -->
+      <section class="view" id="viewOpen" aria-label="Chest Open">
+        <div class="openWrap">
+          <div class="openCardArea">
+            <div class="openCardFrame" id="openCardFrame">
+              <img class="openCardBig" id="openCardBig" alt="" />
+              <img class="openBadge openBadgeLeft hidden" id="openBadgeShiny" src="assets/ui/badge_shiny.png" alt="SHINY" />
+              <img class="openBadge openBadgeRight hidden" id="openBadgeNew" src="assets/ui/badge_new.png" alt="NEU" />
+            </div>
+          </div>
+
+          <button class="openChestBtn" id="openChestBtn" type="button" aria-label="Truhe öffnen">
+            <img class="openChestImg" id="openChestImg" alt="Chest" />
+          </button>
+
+          <div class="openThumbs" id="openThumbs" aria-label="Gezogene Karten"></div>
+        </div>
+      </section>
+
+      <!-- CARD VIEWER MODAL -->
+      <div class="modal hidden" id="modalCard">
+        <div class="modalBox big">
+          <button class="modalClose" id="closeCard" type="button">
+            <img src="assets/icons/icon_close.png" alt="Close" />
+          </button>
+
+          <div class="cardViewer">
+            <div class="badgeRow">
+              <img class="badge hidden" id="badgeNew" src="assets/ui/badge_new.png" alt="NEU" />
+              <img class="badge hidden" id="badgeShiny" src="assets/ui/badge_shiny.png" alt="SHINY" />
+            </div>
+
+            <div class="flipWrap" id="flipWrap">
+              <img class="cardBig" id="cardBig" alt="Card" />
+            </div>
+
+            <div class="dotsRow" id="dotsRow"></div>
+
+            <button class="secondaryBtn" id="btnFlip" type="button">Flip</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast hidden" id="toast"></div>
+    </main>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
