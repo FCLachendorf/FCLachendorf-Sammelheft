@@ -975,9 +975,6 @@ button, input, select, textarea{
   -webkit-user-drag: none;
 }
 
-/* =========================================================
-   ✅ Button-Variablen
-   ========================================================= */
 #buyClick{
   --val-top: 44px;
   --cost-bottom: 8px;
@@ -990,4 +987,35 @@ button, input, select, textarea{
   --cost-bottom: 8px;
   --val-size: 50px;
   --cost-size: 24px;
+}
+
+/* ExtraBoldItalic (800 italic) */
+.coinsBar span,
+.tmLine1,
+.tmUpValue,
+.pageNum.isActive{
+  font-family:"Thunder-ExtraBoldItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight:800;
+  font-style:italic;
+  font-synthesis:none;
+}
+
+/* MediumItalic (500 italic) */
+.tmLine2,
+.tmUpDesc,
+.albumProgress,
+.pageNum{
+  font-family:"Thunder-MediumItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight:500;
+  font-style:italic;
+  font-synthesis:none;
+}
+
+/* SemiBoldItalic (600 italic) */
+.tmPriceText,
+.tmUpCost{
+  font-family:"Thunder-SemiBoldItalic", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight:600;
+  font-style:italic;
+  font-synthesis:none;
 }
