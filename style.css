@@ -66,8 +66,8 @@
   --red:#d63c3c;
 
   /* Shop-Defaults (Rabatt/Scout) */
-  --upgrade-value-top: 54px;
-  --upgrade-cost-bottom: 12px;
+  --upgrade-value-top: clamp(44px, 12vw, 54px);
+  --upgrade-cost-bottom: clamp(9px, 2.4vw, 12px);
 
   --shop-grid-top: 0px;
   --shop-upgrades-top: 130px;
@@ -975,18 +975,11 @@ button, input, select, textarea{
   -webkit-user-drag: none;
 }
 
-#buyClick{
-  --val-top: 44px;
-  --cost-bottom: 8px;
-  --val-size: 50px;
-  --cost-size: 24px;
-}
-
-#buyIdle{
-  --val-top: 44px;
-  --cost-bottom: 8px;
-  --val-size: 50px;
-  --cost-size: 24px;
+#buyClick, #buyIdle{
+  --val-top: clamp(36px, 10vw, 44px);
+  --cost-bottom: clamp(6px, 2.0vw, 8px);
+  --val-size: clamp(38px, 11vw, 50px);
+  --cost-size: clamp(18px, 5.5vw, 24px);
 }
 
 /* ExtraBoldItalic (800 italic) */
