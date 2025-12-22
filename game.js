@@ -6,6 +6,29 @@
 const LS_KEY = "fcl_lootgame_v1";
 const PLAYER_COUNT = 25; // p01..p25
 
+// ✅ Rabatt: 3%-Schritte bis max. 35%
+const DISCOUNT_STEP = 0.03; // 3%
+const DISCOUNT_MAX  = 0.35; // 35%
+const MAX_DISCOUNT_LV = Math.ceil(DISCOUNT_MAX / DISCOUNT_STEP); // 12 (letzter Schritt wird auf 35% gecappt)
+
+// ✅ Scout: bis max. 25% Verbesserung = Level 20
+const SCOUT_MAX_LV = 20;
+const SCOUT_MAX_BONUS = 0.25; // 25%
+
+// ✅ Passiv: 25 Upgrades bis max. 1000/s (exponentiell, integer)
+const IDLE_MAX_LV = 25;
+const IDLE_MAX_PER_SEC = 1000;
+
+// 0=locked, 1..25 => Werte (exponentiell, auf integer gerundet, strikt steigend, endet bei 1000)
+const IDLE_VALUES = [
+  0,
+  1,   2,   4,   6,   8,
+  11,  14,  19,  25,  32,
+  40,  51,  65,  82,  104,
+  131, 165, 207, 259, 325,
+  407, 510, 639, 799, 1000
+];
+
 // Album: 3 Seiten, feste Reihenfolge
 const ALBUM_PAGES = [
   ["p25", "p23", "p24",
@@ -83,17 +106,62 @@ const CLICK_FX_SOURCES = [
    Helpers
    ========================= */
 function pid(i) { return `p${String(i).padStart(2, "0")}`; }
+
 function cardPath(id, suffix) {
   // suffix: "n" | "s" (klein jpg) | "l" (placeholder png)
   const ext = (suffix === "l") ? "png" : "jpg";
   return `assets/cards/${id}_${suffix}.${ext}`;
 }
+
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function now() { return performance.now(); }
+
 function fmtPct(x) {
   const p = x * 100;
   const s = (Math.round(p * 10) / 10).toFixed(1);
   return s.endsWith(".0") ? s.slice(0, -2) : s;
+}
+
+function getDiscountFrac() {
+  // ✅ 3%-Schritte, gecappt auf 35%
+  return Math.min(DISCOUNT_MAX, state.discountLv * DISCOUNT_STEP);
+}
+
+function isDiscountMaxed() {
+  return getDiscountFrac() >= (DISCOUNT_MAX - 1e-9);
+}
+
+function getScoutBonusFrac() {
+  const lv = clamp(Number(state.scoutLv || 0), 0, SCOUT_MAX_LV);
+  return SCOUT_MAX_BONUS * (lv / SCOUT_MAX_LV); // 0..0.25
+}
+
+function isScoutMaxed() {
+  return (state.scoutLv ?? 0) >= SCOUT_MAX_LV;
+}
+
+function idleLevelFromPerSec(perSec) {
+  if (!perSec || perSec <= 0) return 0;
+
+  // exaktes Matching bevorzugen
+  const exact = IDLE_VALUES.indexOf(perSec);
+  if (exact >= 0) return clamp(exact, 0, IDLE_MAX_LV);
+
+  // sonst: nächstliegendes Level
+  let bestIdx = 1;
+  let bestDiff = Infinity;
+  for (let i = 1; i <= IDLE_MAX_LV; i++) {
+    const d = Math.abs(IDLE_VALUES[i] - perSec);
+    if (d < bestDiff) {
+      bestDiff = d;
+      bestIdx = i;
+    }
+  }
+  return bestIdx;
+}
+
+function isIdleMaxed() {
+  return state.idlePerSec >= IDLE_MAX_PER_SEC || idleLevelFromPerSec(state.idlePerSec) >= IDLE_MAX_LV;
 }
 
 /* =========================================================
@@ -114,11 +182,37 @@ function loadState() {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return structuredClone(DEFAULT_STATE);
+
     const parsed = JSON.parse(raw);
     const st = { ...structuredClone(DEFAULT_STATE), ...parsed };
+
     st.owned ??= {};
     st.lastNew ??= [];
     st.seenNew ??= {};
+
+    // ✅ Rabatt-Level clamp
+    st.discountLv = clamp(Number(st.discountLv || 0), 0, MAX_DISCOUNT_LV);
+
+    // ✅ Scout clamp (max 20)
+    st.scoutLv = clamp(Number(st.scoutLv || 0), 0, SCOUT_MAX_LV);
+
+    // ✅ ClickPower sanity
+    if (typeof st.clickPower !== "number" || !Number.isFinite(st.clickPower)) st.clickPower = 1;
+    st.clickPower = Math.max(1, Math.floor(st.clickPower));
+
+    // ✅ Passive: Migration + clamp + Mapping auf neue 25er-Kurve
+    if (typeof st.idlePerSec !== "number" || !Number.isFinite(st.idlePerSec)) st.idlePerSec = 0;
+    st.idlePerSec = Math.max(0, Math.floor(st.idlePerSec));
+
+    // Falls durch altes System viel zu hoch: hart cap
+    if (st.idlePerSec > IDLE_MAX_PER_SEC) st.idlePerSec = IDLE_MAX_PER_SEC;
+
+    // Mappe auf nächstliegenden erlaubten Wert (damit Save stabil bleibt)
+    if (st.idlePerSec > 0 && IDLE_VALUES.indexOf(st.idlePerSec) === -1) {
+      const lvl = idleLevelFromPerSec(st.idlePerSec);
+      st.idlePerSec = IDLE_VALUES[clamp(lvl, 0, IDLE_MAX_LV)];
+    }
+
     return st;
   } catch {
     return structuredClone(DEFAULT_STATE);
@@ -241,14 +335,12 @@ function bindTap(el, onTap, opts = {}) {
 
 /* =========================================================
    Main Text-Style: 1:1 Shop-Upgrade Werte
-   (nimmt CSS-Variablen + Shop-Größen)
    ========================================================= */
 function applyShopTextStyleToMainButtons() {
   const root = getComputedStyle(document.documentElement);
   const top = (root.getPropertyValue("--upgrade-value-top") || "54px").trim();
   const bottom = (root.getPropertyValue("--upgrade-cost-bottom") || "12px").trim();
 
-  // Shop nutzt 50px / 24px in deinem CSS
   const valueSize = "50px";
   const costSize = "24px";
 
@@ -356,7 +448,6 @@ function setBg(path) {
 }
 
 function setHudForView(which) {
-  // links: main->album, album->shop, shop->album
   if (which === "album") {
     btnLeftIcon.src = "assets/icons/icon_shop.png";
     btnLeft.title = "Shop";
@@ -367,7 +458,6 @@ function setHudForView(which) {
     btnLeftIcon.alt = "Album";
   }
 
-  // rechts: main->shop, sonst close
   if (which === "main") {
     btnRightIcon.src = "assets/icons/icon_shop.png";
     btnRight.title = "Shop";
@@ -530,14 +620,13 @@ function spawnFxParticle(x, y, src, delayMs) {
 }
 
 /* =========================================================
-   Main: Logo Click (mit Klickpunkt-FX)
+   Main: Logo Click
    ========================================================= */
 let press = { active: false, pointerId: null, downX: 0, downY: 0 };
 
 if (logoBtn) {
   logoBtn.addEventListener("pointerdown", (e) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
-    // wichtig: mobile ghost-clicks vermeiden
     e.preventDefault();
     press.active = true;
     press.pointerId = e.pointerId;
@@ -593,8 +682,22 @@ setInterval(() => {
 /* =========================================================
    Upgrade Costs + Main Buttons
    ========================================================= */
-function costClick() { return Math.floor(60 * Math.pow(1.45, state.clickPower - 1)); }
-function costIdle()  { return Math.floor(140 * Math.pow(1.55, state.idlePerSec)); }
+function costClick() {
+  return Math.floor(60 * Math.pow(1.45, state.clickPower - 1));
+}
+
+// ✅ Passiv: 25 Schritte bis 1000/s, exponentiell (nicht *2)
+// Kosten: spürbar teurer als Klick und skaliert mit dem nächsten Zielwert
+function costIdle() {
+  const lvl = idleLevelFromPerSec(state.idlePerSec);
+  if (lvl >= IDLE_MAX_LV) return Infinity;
+
+  const nextPerSec = IDLE_VALUES[lvl + 1]; // Ziel nach dem Kauf
+  const base = 150 * Math.pow(nextPerSec, 1.30); // wächst stark genug Richtung Endgame
+  const minVsClick = costClick() * 1.6;          // bleibt merklich teurer als Klick
+  return Math.floor(Math.max(base, minVsClick));
+}
+
 function costDisc()  { return Math.floor(220 * Math.pow(1.7, state.discountLv)); }
 function costScout() { return Math.floor(260 * Math.pow(1.65, state.scoutLv)); }
 
@@ -611,20 +714,23 @@ function setMainUpgradePressed(which, pressed) {
 
 function renderMainUpgrades() {
   const cClick = costClick();
-  const cIdle = costIdle();
 
   if (uClickVal) uClickVal.textContent = `+${state.clickPower}`;
-  if (uIdleVal) uIdleVal.textContent = `${state.idlePerSec}/s`;
+  if (uIdleVal) uIdleVal.textContent = `${Math.floor(state.idlePerSec)}/s`;
 
-  // WICHTIG: im Main wie Shop: NUR Zahl (kein "Kosten:")
   if (uClickCost) uClickCost.textContent = String(cClick);
-  if (uIdleCost) uIdleCost.textContent = String(cIdle);
 
-  const canC = canAfford(cClick);
-  const canI = canAfford(cIdle);
+  // ✅ Idle Max-Handling
+  if (isIdleMaxed()) {
+    if (uIdleCost) uIdleCost.textContent = "Max.";
+    if (buyIdle) buyIdle.disabled = true;
+  } else {
+    const cIdle = costIdle();
+    if (uIdleCost) uIdleCost.textContent = String(cIdle);
+    if (buyIdle) buyIdle.disabled = !canAfford(cIdle);
+  }
 
-  if (buyClick) buyClick.disabled = !canC;
-  if (buyIdle) buyIdle.disabled = !canI;
+  if (buyClick) buyClick.disabled = !canAfford(cClick);
 }
 
 bindTap(buyClick, () => {
@@ -640,10 +746,16 @@ bindTap(buyClick, () => {
 });
 
 bindTap(buyIdle, () => {
+  if (isIdleMaxed()) return;
+
   const c = costIdle();
   if (!canAfford(c)) return;
   spendCoins(c);
-  state.idlePerSec += 1;
+
+  const lvl = idleLevelFromPerSec(state.idlePerSec);
+  const nextLvl = clamp(lvl + 1, 0, IDLE_MAX_LV);
+  state.idlePerSec = IDLE_VALUES[nextLvl]; // ✅ nächster definierter Schritt (ohne Komma)
+
   scheduleSave();
   renderMainUpgrades();
 }, {
@@ -655,7 +767,7 @@ bindTap(buyIdle, () => {
    Shop: Preise + Upgrades (Rabatt/Scout)
    ========================================================= */
 function chestPrice(ch) {
-  const disc = Math.min(0.35, state.discountLv * 0.05);
+  const disc = getDiscountFrac(); // 0..0.35
   return Math.max(10, Math.floor(ch.basePrice * (1 - disc)));
 }
 
@@ -718,36 +830,49 @@ function renderShopUpgrades() {
   if (!shopUpgrades) return;
   shopUpgrades.innerHTML = "";
 
-  const discPct = Math.min(35, state.discountLv * 5);
+  // Rabatt Anzeige
+  const discPct = Math.round(getDiscountFrac() * 100); // 0..35
+  const discMaxed = isDiscountMaxed();
   const discCost = costDisc();
+
+  // Scout Anzeige
+  const scoutMaxed = isScoutMaxed();
   const scoutCost = costScout();
-  const scoutShown = state.scoutLv + 1;
+
+  // "Lvl" zeigt das Ziel des nächsten Kaufs – aber bei Max bleibt's bei 20
+  const scoutValueText = scoutMaxed ? `Lvl. ${SCOUT_MAX_LV}` : `Lvl. ${state.scoutLv + 1}`;
 
   const items = [
     {
       imgN: "assets/ui/rabatt_button_n.png",
       value: `${discPct}%`,
-      cost: discCost,
+      costText: discMaxed ? "Max." : String(discCost),
       desc: "Günstigere Truhen",
-      can: canAfford(discCost),
+      isDisabled: discMaxed || !canAfford(discCost),
       onBuy: () => {
+        if (discMaxed) return;
         if (!canAfford(discCost)) return;
+
         spendCoins(discCost);
-        state.discountLv += 1;
+        state.discountLv = clamp(state.discountLv + 1, 0, MAX_DISCOUNT_LV);
+
         scheduleSave();
         renderShop();
       }
     },
     {
       imgN: "assets/ui/scout_button_n.png",
-      value: `Lvl. ${scoutShown}`,
-      cost: scoutCost,
+      value: scoutValueText,
+      costText: scoutMaxed ? "Max." : String(scoutCost),
       desc: "Neue Karten Wahrscheinlicher",
-      can: canAfford(scoutCost),
+      isDisabled: scoutMaxed || !canAfford(scoutCost),
       onBuy: () => {
+        if (scoutMaxed) return;
         if (!canAfford(scoutCost)) return;
+
         spendCoins(scoutCost);
-        state.scoutLv += 1;
+        state.scoutLv = clamp(state.scoutLv + 1, 0, SCOUT_MAX_LV);
+
         scheduleSave();
         renderShop();
       }
@@ -764,9 +889,13 @@ function renderShopUpgrades() {
     btn.innerHTML = `
       <img class="tmUpBg" src="${it.imgN}" alt="">
       <div class="tmUpValue">${it.value}</div>
-      <div class="tmUpCost">${it.cost}</div>
+      <div class="tmUpCost">${it.costText}</div>
     `;
-    if (!it.can) btn.style.opacity = ".45";
+
+    if (it.isDisabled) {
+      btn.style.opacity = ".45";
+      if (it.costText === "Max.") btn.style.pointerEvents = "none";
+    }
 
     bindTap(btn, it.onBuy);
 
@@ -963,7 +1092,6 @@ function openCardViewer(id) {
   updateCardViewerBadges(id, show);
   if (cardBig) cardBig.src = cardPath(id, show);
 
-  // "NEU" beim Öffnen löschen
   if (show === "n" || show === "s") {
     const key = `${id}_${show}`;
     if (state.seenNew?.[key]) {
@@ -1222,35 +1350,50 @@ function generatePulls(ch, pricePaid) {
   return pulls;
 }
 
+/* =========================================================
+   ✅ Scout-Logik: spürbar für neue Karten
+   - Bis max 25% (Level 20) wird ein Pull "gezielt" aus fehlenden Karten gezogen,
+     sofern es überhaupt noch fehlende gibt.
+   - Rest bleibt normal gewichtet (Duplikate werden weiterhin unwahrscheinlicher).
+   ========================================================= */
 function pickPlayerId() {
-  const ids = [];
-  const weights = [];
+  const idsAll = [];
+  const weightsAll = [];
 
-  const newBoost = 2.2 + state.scoutLv * 0.18;
-  const decay = 1.15 + state.scoutLv * 0.04;
-  const minW = 0.08;
+  const idsMissing = [];
+  const weightsMissing = [];
+
+  // Duplikate leicht dämpfen
+  const decay = 1.22;
+  const minW = 0.10;
 
   for (let i = 1; i <= PLAYER_COUNT; i++) {
     const id = pid(i);
     const o = state.owned[id];
-    const hasAny = o?.n || o?.s;
+    const hasAny = !!(o?.n || o?.s);
     const copies = (o?.cn ?? 0) + (o?.cs ?? 0);
 
-    let w;
-    if (!hasAny) w = 1.0 * newBoost;
-    else {
-      w = 1.0 / Math.pow(1 + copies, decay);
-      w = Math.max(minW, w);
-    }
+    let w = hasAny ? (1.0 / Math.pow(1 + copies, decay)) : 1.0;
+    w = Math.max(minW, w);
 
     // p25 (Wappen) seltener
     if (id === "p25") w *= 0.28;
 
-    ids.push(id);
-    weights.push(w);
+    idsAll.push(id);
+    weightsAll.push(w);
+
+    if (!hasAny) {
+      idsMissing.push(id);
+      weightsMissing.push(w);
+    }
   }
 
-  return pickByWeights(ids, weights);
+  const bonus = getScoutBonusFrac(); // 0..0.25
+  if (idsMissing.length > 0 && bonus > 0 && Math.random() < bonus) {
+    return pickByWeights(idsMissing, weightsMissing);
+  }
+
+  return pickByWeights(idsAll, weightsAll);
 }
 
 function pickByWeights(items, weights) {
@@ -1273,8 +1416,7 @@ function rollVariant(id, ch) {
   if (hasN && !hasS) shinyChance = ch.shinyBoostIfNormal;
   else if (hasS) shinyChance = ch.shinyBase;
 
-  shinyChance *= (1 + state.scoutLv * 0.01);
-
+  // ✅ Scout beeinflusst hier NICHT mehr Shiny (Scout ist "neue Karten", nicht "shiny farmen")
   const isShiny = Math.random() < shinyChance;
   return { isShiny };
 }
@@ -1298,7 +1440,7 @@ function applyPull(id, isShiny, pricePaid) {
   const isNew = !wasOwned;
 
   if (!isNew) {
-    refund = isShiny ? Math.floor(pricePaid * 0.55) : Math.floor(pricePaid * 0.18);
+    refund = isShiny ? Math.floor(pricePaid * 0.45) : Math.floor(pricePaid * 0.14);
     gainCoins(refund);
   } else {
     state.lastNew.push(key);
@@ -1344,7 +1486,6 @@ renderAll();
 (function preventZoom() {
   const area = document.getElementById("stage") || document.body;
 
-  // Pinch-Zoom (Safari) blocken
   area.addEventListener("touchstart", (e) => {
     if (e.touches && e.touches.length > 1) e.preventDefault();
   }, { passive: false });
@@ -1353,7 +1494,6 @@ renderAll();
     if (e.touches && e.touches.length > 1) e.preventDefault();
   }, { passive: false });
 
-  // Double-Tap-Zoom blocken
   let lastTouchEnd = 0;
   area.addEventListener("touchend", (e) => {
     const now = Date.now();
