@@ -742,7 +742,7 @@ function renderShopUpgrades() {
       imgN: "assets/ui/scout_button_n.png",
       value: `Lvl. ${scoutShown}`,
       cost: scoutCost,
-      desc: "Neue Karten Wahrscheinlichkeit",
+      desc: "Neue Karten Wahrscheinlicher",
       can: canAfford(scoutCost),
       onBuy: () => {
         if (!canAfford(scoutCost)) return;
