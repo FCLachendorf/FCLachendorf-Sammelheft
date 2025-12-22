@@ -1,41 +1,58 @@
 @font-face{
   font-family:"Thunder-ExtraBoldItalic";
-  src:url("assets/fonts/Thunder-ExtraBoldLCItalic.ttf") format("truetype");
+  src:
+    url("assets/fonts/Thunder-ExtraBoldLCItalic.woff") format("woff"),
+    url("assets/fonts/Thunder-ExtraBoldLCItalic.ttf") format("truetype");
   font-style:italic;
   font-weight:800;
   font-display: swap;
 }
+
 @font-face{
   font-family:"Thunder-MediumItalic";
-  src:url("assets/fonts/Thunder-MediumLCItalic.ttf") format("truetype");
+  src:
+    url("assets/fonts/Thunder-MediumLCItalic.woff") format("woff"),
+    url("assets/fonts/Thunder-MediumLCItalic.ttf") format("truetype");
   font-style:italic;
   font-weight:500;
   font-display: swap;
 }
+
 @font-face{
   font-family:"Thunder-SemiBoldItalic";
-  src:url("assets/fonts/Thunder-SemiBoldLCItalic.ttf") format("truetype");
+  src:
+    url("assets/fonts/Thunder-SemiBoldLCItalic.woff") format("woff"),
+    url("assets/fonts/Thunder-SemiBoldLCItalic.ttf") format("truetype");
   font-style:italic;
   font-weight:600;
   font-display: swap;
 }
+
 @font-face{
   font-family:"Thunder-ExtraBold";
-  src:url("assets/fonts/Thunder-ExtraBoldLC.ttf") format("truetype");
+  src:
+    url("assets/fonts/Thunder-ExtraBoldLC.woff") format("woff"),
+    url("assets/fonts/Thunder-ExtraBoldLC.ttf") format("truetype");
   font-style:normal;
   font-weight:800;
   font-display: swap;
 }
+
 @font-face{
   font-family:"Thunder-Medium";
-  src:url("assets/fonts/Thunder-MediumLC.ttf") format("truetype");
+  src:
+    url("assets/fonts/Thunder-MediumLC.woff") format("woff"),
+    url("assets/fonts/Thunder-MediumLC.ttf") format("truetype");
   font-style:normal;
   font-weight:500;
   font-display: swap;
 }
+
 @font-face{
   font-family:"Thunder-SemiBold";
-  src:url("assets/fonts/Thunder-SemiBoldLC.ttf") format("truetype");
+  src:
+    url("assets/fonts/Thunder-SemiBoldLC.woff") format("woff"),
+    url("assets/fonts/Thunder-SemiBoldLC.ttf") format("truetype");
   font-style:normal;
   font-weight:600;
   font-display: swap;
