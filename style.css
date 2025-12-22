@@ -3,36 +3,42 @@
   src:url("assets/fonts/Thunder-ExtraBoldLCItalic.ttf") format("truetype");
   font-style:italic;
   font-weight:800;
+  font-display: swap;
 }
 @font-face{
   font-family:"Thunder-MediumItalic";
   src:url("assets/fonts/Thunder-MediumLCItalic.ttf") format("truetype");
   font-style:italic;
   font-weight:500;
+  font-display: swap;
 }
 @font-face{
   font-family:"Thunder-SemiBoldItalic";
   src:url("assets/fonts/Thunder-SemiBoldLCItalic.ttf") format("truetype");
   font-style:italic;
   font-weight:600;
+  font-display: swap;
 }
 @font-face{
   font-family:"Thunder-ExtraBold";
   src:url("assets/fonts/Thunder-ExtraBoldLC.ttf") format("truetype");
   font-style:normal;
   font-weight:800;
+  font-display: swap;
 }
 @font-face{
   font-family:"Thunder-Medium";
   src:url("assets/fonts/Thunder-MediumLC.ttf") format("truetype");
   font-style:normal;
   font-weight:500;
+  font-display: swap;
 }
 @font-face{
   font-family:"Thunder-SemiBold";
   src:url("assets/fonts/Thunder-SemiBoldLC.ttf") format("truetype");
   font-style:normal;
   font-weight:600;
+  font-display: swap;
 }
 
 :root{
@@ -52,14 +58,28 @@
 
 *{box-sizing:border-box}
 html,body{height:100%}
-body{
+
+/* ✅ iOS/Handy: Zoomen/OverScroll stark reduzieren */
+html, body{
   margin:0;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+body{
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background:#0b0d10;
   color:var(--text);
   display:flex;
   align-items:center;
   justify-content:center;
+}
+
+/* ✅ Buttons/Inputs: auf iOS nicht “einfach so” Systemfont nehmen */
+button, input, select, textarea{
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .shell{
@@ -81,6 +101,9 @@ body{
   background:#101216;
   user-select:none;
   -webkit-tap-highlight-color: transparent;
+
+  /* ✅ wichtig gegen Pinch/Doppeltap-Zoom */
+  touch-action: none;
 }
 
 .bg{
@@ -149,6 +172,10 @@ body{
   padding:10px 12px 14px;
   display:none;
   overflow:auto;
+
+  /* ✅ Scrollen (falls nötig) erlauben, ohne Zoom */
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 .view.active{display:block}
 #viewShop{overflow:hidden}
@@ -257,6 +284,7 @@ body{
    ========================================================= */
 #viewMain{
   overflow:hidden; /* kein Scrollen im Main */
+  touch-action: none; /* ✅ im Main wirklich alles an Gesten weg */
 }
 
 #viewMain .mainWrap{
@@ -329,10 +357,7 @@ body{
   display:block;
 }
 
-/* ✅ HIER ist der entscheidende Fix:
-   - Wir nutzen Variablen, die du pro Button setzen kannst
-   - und überschreiben Inline-Styles aus dem JS mit !important,
-     damit deine CSS-Änderungen endlich sichtbar werden. */
+/* ✅ Fix (deine Variablen-Logik) */
 #viewMain .mainUpgrades .tmUpValue{
   top: var(--val-top, var(--main-val-top, var(--upgrade-value-top))) !important;
   font-size: var(--val-size, var(--main-val-size, 50px)) !important;
@@ -354,7 +379,7 @@ body{
   letter-spacing: .35px;
 }
 
-/* Beschreibungen wie Shop (Font + Farbe), etwas kleiner */
+/* Beschreibungen wie Shop */
 #viewMain .mainUpgrades .tmUpDesc{
   font-family:"Thunder-MediumItalic";
   font-size:15px;
@@ -362,7 +387,7 @@ body{
   text-align:center;
 }
 
-/* Hint ganz unten zentriert im selben Stil */
+/* Hint unten */
 #viewMain .mainHint{
   margin-top:6px;
   padding:0 10px 10px;
@@ -371,7 +396,7 @@ body{
   text-align:center;
 }
 
-/* Debug-Footer im Main ausblenden (Shop/Album bleibt unberührt) */
+/* Debug-Footer im Main ausblenden */
 #viewMain .footerNote{
   display:none;
 }
@@ -580,7 +605,6 @@ body{
 }
 .modalBox.big{padding:14px}
 
-/* Close-Icon ohne extra Border */
 .modalClose{
   position:absolute;
   top:10px;
@@ -672,6 +696,7 @@ body{
   padding:0;
   height:auto;
   overflow:hidden;
+  touch-action: none;
 }
 .openWrap{position:absolute; inset:0;}
 
@@ -933,30 +958,19 @@ body{
   -webkit-user-drag: none;
 }
 
-.stage{
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* KLICK Button */
+/* =========================================================
+   ✅ Button-Variablen
+   ========================================================= */
 #buyClick{
-  --val-top: 44px;         /* Abstand von oben für große Zahl */
-  --cost-bottom: 8px;     /* Abstand von unten für Kosten */
-  --val-size: 50px;        /* Schriftgröße große Zahl */
-  --cost-size: 24px;       /* Schriftgröße Kosten */
-}
-
-/* PASSIV Button */
-#buyIdle{
   --val-top: 44px;
   --cost-bottom: 8px;
   --val-size: 50px;
   --cost-size: 24px;
 }
 
-button, input, select, textarea {
-  font-family: inherit;
-  font-size: inherit;
-}
-input, select, textarea {
-  -webkit-appearance: none;
+#buyIdle{
+  --val-top: 44px;
+  --cost-bottom: 8px;
+  --val-size: 50px;
+  --cost-size: 24px;
 }
