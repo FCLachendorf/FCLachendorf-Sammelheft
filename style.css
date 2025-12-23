@@ -64,6 +64,7 @@
   --panel:rgba(0,0,0,.35);
   --line:rgba(255,255,255,.10);
   --red:#d63c3c;
+  --outer-bg: url("assets/bg/bg_main_1080x1920.png");
 
   /* Shop-Defaults (Rabatt/Scout) */
   --upgrade-value-top: clamp(44px, 12vw, 54px);
@@ -93,6 +94,42 @@ body{
   justify-content:center;
 }
 
+body{
+  position: relative;
+}
+
+/* Fullscreen Background */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+
+  background-image: var(--outer-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* optional: sieht nicer aus + kaschiert Stretch */
+  filter: blur(18px) saturate(1.1);
+  transform: scale(1.06);
+}
+
+/* dunkler Overlay damit Stage sauber lesbar bleibt */
+body::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: rgba(0,0,0,0.55);
+}
+
+/* alles vom Spiel MUSS über dem Hintergrund liegen */
+.shell{
+  position: relative;
+  z-index: 1;
+}
+
 /* ✅ Buttons/Inputs: auf iOS nicht “einfach so” Systemfont nehmen */
 button, input, select, textarea{
   font-family: inherit;
@@ -113,7 +150,7 @@ button, input, select, textarea{
   aspect-ratio:9/16;
   position:relative;
   overflow:hidden;
-  border:1px solid rgba(255,255,255,.08);
+  border:none;
   box-shadow: 0 24px 80px rgba(0,0,0,.6);
   background:#101216;
   user-select:none;
