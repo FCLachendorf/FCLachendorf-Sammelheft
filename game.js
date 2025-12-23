@@ -443,7 +443,10 @@ let currentView = "main";
 let albumPageIndex = 0;
 
 function setBg(path) {
-  if (!bg) return;
+  // Stage-Hintergrund (der "richtige" Ingame-BG)
+  if (bg) bg.style.backgroundImage = `url("${path}")`;
+
+  // Außenbereich (Fullscreen/Blur-BG)
   document.documentElement.style.setProperty("--outer-bg", `url("${path}")`);
 }
 
