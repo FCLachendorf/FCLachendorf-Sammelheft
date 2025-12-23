@@ -100,7 +100,7 @@ body{
 
 /* Fullscreen Background */
 body::before{
-  content:none;
+  content:"";
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -117,7 +117,7 @@ body::before{
 
 /* dunkler Overlay damit Stage sauber lesbar bleibt */
 body::after{
-  content:none;
+  content:"";
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -142,7 +142,7 @@ button, input, select, textarea{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:0px;
+  padding:14px;
 }
 
 .stage{
@@ -151,8 +151,8 @@ button, input, select, textarea{
   position:relative;
   overflow:hidden;
   border:none;
-  box-shadow: none;
-  background: transparent;
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  background:#101216;
   user-select:none;
   -webkit-tap-highlight-color: transparent;
 
@@ -161,16 +161,12 @@ button, input, select, textarea{
 }
 
 .bg{
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background-image: var(--outer-bg);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: none;             /* kein Blur */
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  filter: saturate(1.05);
 }
-
 
 /* ---------- HUD ---------- */
 .topbar{
