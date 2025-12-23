@@ -444,7 +444,7 @@ let albumPageIndex = 0;
 
 function setBg(path) {
   if (!bg) return;
-  bg.style.backgroundImage = `url("${path}")`;
+  document.documentElement.style.setProperty("--outer-bg", `url("${path}")`);
 }
 
 function setHudForView(which) {
